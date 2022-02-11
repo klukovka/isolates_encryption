@@ -1,13 +1,21 @@
-import 'package:isolates_encryption/isolates/isolate_dto.dart';
+import 'dart:isolate';
+
+class AtbashIsolateDto {
+  final SendPort sendPort;
+  final String text;
+
+  AtbashIsolateDto(this.sendPort, this.text);
+}
 
 class Atbash {
-  static const _alphabet = 'abcdefghijklmnopqrstuvwxyz';
+  static const _alphabet =
+      'abcdefghijklmnopqrstuvwxyzАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
 
-  static void atbashEncryptIsolate(IsolateDto isolateDto) {
+  static void atbashEncryptIsolate(AtbashIsolateDto isolateDto) {
     isolateDto.sendPort.send(_encryptText(isolateDto.text));
   }
 
-  static void atbashDecryptIsolate(IsolateDto isolateDto) {
+  static void atbashDecryptIsolate(AtbashIsolateDto isolateDto) {
     isolateDto.sendPort.send(_decryptText(isolateDto.text));
   }
 
@@ -32,10 +40,8 @@ class Atbash {
     var outputText = '';
 
     for (var i = 0; i < text.length; i++) {
-      //поиск позиции символа в строке алфавита
       var index = symbols.indexOf(text[i]);
       if (index >= 0) {
-        //замена символа на шифр
         outputText += cipher[index].toString();
       }
     }

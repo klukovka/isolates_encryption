@@ -2,7 +2,7 @@ import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:isolates_encryption/isolates/atbash_isolate.dart';
-import 'package:isolates_encryption/isolates/isolate_dto.dart';
+import 'package:isolates_encryption/isolates/caesar_cipher_isolate.dart';
 
 class IsolatesEncryptionApp extends StatelessWidget {
   const IsolatesEncryptionApp({Key? key}) : super(key: key);
@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
     final receivePort = ReceivePort();
     await Isolate.spawn(
         Atbash.atbashEncryptIsolate,
-        IsolateDto(
+        AtbashIsolateDto(
           receivePort.sendPort,
           _textController.text,
         ));
@@ -56,9 +56,37 @@ class _HomePageState extends State<HomePage> {
     final receivePort = ReceivePort();
     await Isolate.spawn(
         Atbash.atbashDecryptIsolate,
-        IsolateDto(
+        AtbashIsolateDto(
           receivePort.sendPort,
           _textController.text,
+        ));
+    receivePort.listen((message) {
+      _showSnackBar(message);
+    });
+  }
+
+  void _caesarCipherEncrypt() async {
+    final receivePort = ReceivePort();
+    await Isolate.spawn(
+        CaesarCipherIsolate.atbashEncryptIsolate,
+        CaesarCipherIsolateDto(
+          receivePort.sendPort,
+          _textController.text,
+          2,
+        ));
+    receivePort.listen((message) {
+      _showSnackBar(message);
+    });
+  }
+
+  void _caesarCipherDecrypt() async {
+    final receivePort = ReceivePort();
+    await Isolate.spawn(
+        CaesarCipherIsolate.atbashDecryptIsolate,
+        CaesarCipherIsolateDto(
+          receivePort.sendPort,
+          _textController.text,
+          2,
         ));
     receivePort.listen((message) {
       _showSnackBar(message);
@@ -83,6 +111,7 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildAtbashButtons(),
+            _buildCaesarCipherButtons(),
             TextField(
               controller: _textController,
             ),
@@ -93,8 +122,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildAtbashButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return Wrap(
+      spacing: 12,
       children: [
         ElevatedButton(
           onPressed: _atbashEncrypt,
@@ -103,6 +132,22 @@ class _HomePageState extends State<HomePage> {
         ElevatedButton(
           onPressed: _atbashDecrypt,
           child: const Text('Atbash Decrypt'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCaesarCipherButtons() {
+    return Wrap(
+      spacing: 12,
+      children: [
+        ElevatedButton(
+          onPressed: _caesarCipherEncrypt,
+          child: const Text('CaesarCipher Encrypt'),
+        ),
+        ElevatedButton(
+          onPressed: _caesarCipherDecrypt,
+          child: const Text('CaesarCipher Decrypt'),
         ),
       ],
     );
