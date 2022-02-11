@@ -16,11 +16,11 @@ class CaesarCipherIsolate {
   static const _alphabet =
       'abcdefghijklmnopqrstuvwxyzАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
 
-  static void atbashEncryptIsolate(CaesarCipherIsolateDto isolateDto) {
+  static void caesarCipherEncryptIsolate(CaesarCipherIsolateDto isolateDto) {
     isolateDto.sendPort.send(_encrypt(isolateDto.text, isolateDto.key));
   }
 
-  static void atbashDecryptIsolate(CaesarCipherIsolateDto isolateDto) {
+  static void caesarCipherDecryptIsolate(CaesarCipherIsolateDto isolateDto) {
     isolateDto.sendPort.send(_decrypt(isolateDto.text, isolateDto.key));
   }
 

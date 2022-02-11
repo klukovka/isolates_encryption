@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:isolates_encryption/isolates/atbash_isolate.dart';
 import 'package:isolates_encryption/isolates/caesar_cipher_isolate.dart';
 
+import 'isolates/vigenere_cipher_isolate.dart';
+
 class IsolatesEncryptionApp extends StatelessWidget {
   const IsolatesEncryptionApp({Key? key}) : super(key: key);
 
@@ -68,7 +70,7 @@ class _HomePageState extends State<HomePage> {
   void _caesarCipherEncrypt() async {
     final receivePort = ReceivePort();
     await Isolate.spawn(
-        CaesarCipherIsolate.atbashEncryptIsolate,
+        CaesarCipherIsolate.caesarCipherEncryptIsolate,
         CaesarCipherIsolateDto(
           receivePort.sendPort,
           _textController.text,
@@ -82,12 +84,48 @@ class _HomePageState extends State<HomePage> {
   void _caesarCipherDecrypt() async {
     final receivePort = ReceivePort();
     await Isolate.spawn(
-        CaesarCipherIsolate.atbashDecryptIsolate,
+        CaesarCipherIsolate.caesarCipherDecryptIsolate,
         CaesarCipherIsolateDto(
           receivePort.sendPort,
           _textController.text,
           2,
         ));
+    receivePort.listen((message) {
+      _showSnackBar(message);
+    });
+  }
+
+  void _vigenereCipherEncrypt() async {
+    final receivePort = ReceivePort();
+    final vigenereCipher = VigenereCipherIsolate();
+
+    await Isolate.spawn(
+      vigenereCipherEncryptIsolate(vigenereCipher),
+      VigenereCipherIsolateDto(
+        receivePort.sendPort,
+        _textController.text,
+        'password',
+      ),
+    );
+
+    receivePort.listen((message) {
+      _showSnackBar(message);
+    });
+  }
+
+  void _vigenereCipherDecrypt() async {
+    final receivePort = ReceivePort();
+    final vigenereCipher = VigenereCipherIsolate();
+
+    await Isolate.spawn(
+      vigenereCipherDecryptIsolate(vigenereCipher),
+      VigenereCipherIsolateDto(
+        receivePort.sendPort,
+        _textController.text,
+        'password',
+      ),
+    );
+
     receivePort.listen((message) {
       _showSnackBar(message);
     });
@@ -112,6 +150,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             _buildAtbashButtons(),
             _buildCaesarCipherButtons(),
+            _buildVigenereButtons(),
             TextField(
               controller: _textController,
             ),
@@ -148,6 +187,22 @@ class _HomePageState extends State<HomePage> {
         ElevatedButton(
           onPressed: _caesarCipherDecrypt,
           child: const Text('CaesarCipher Decrypt'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVigenereButtons() {
+    return Wrap(
+      spacing: 12,
+      children: [
+        ElevatedButton(
+          onPressed: _vigenereCipherEncrypt,
+          child: const Text('Vigenere Encrypt'),
+        ),
+        ElevatedButton(
+          onPressed: _vigenereCipherDecrypt,
+          child: const Text('Vigenere Decrypt'),
         ),
       ],
     );
